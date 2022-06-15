@@ -12,7 +12,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Install and Build
-        run: | #执行命令
+        run: |
           npm install
           npm run-script build
       - name: Deploy
