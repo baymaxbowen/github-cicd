@@ -24,29 +24,29 @@ Github Action 是 Github 推出的一个 `CI\CD` 服务<br/>
 2) 创建一个react项目,在package.json文件中,加一个homepage字段<br/>```"homepage": "https://[username].github.io/demo"```
 3) 在`.github/workflows` 的目录中创建一个workflow文件,比如ci.yml<br/>
 ```yml
-name: GitHub Actions Build and Deploy Demo #workflow 命名
-on:
-  push:
-    branches:
-      - main  #在push到main分支的时候触发 jobs
+name: Build and Deploy
+on: [push]
+permissions:
+  contents: write
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest #通过 Github 上的docker容器运行
+    concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout # 获取源代码
-        uses: actions/checkout@master # 使用了别人的提供的action
-        with: # 步骤的参数,设置版本、环境变量等
-          persist-credentials: false 
-      - name: Install and Build #构建和部署
-        run: | 
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Install and Build 🔧 # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
+        run: |
           npm install
-          npm run-script build
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@releases/v3
-        with: #配置环境变量
-          ACCESS_TOKEN: ${{ secrets.TOKEN }} # 申请的密钥
-          BRANCH: gh-pages # 发布的分支
-          FOLDER: dist #构建出来的目录
-          BUILD_SCRIPT: npm install && npm run build #构建的脚本
+          npm run build
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.3.3
+        with:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          branch: gh-pages # The branch the action should deploy to.
+          folder: "dist" # The folder the action should deploy.
+
 ```
 4) 将代码推送到`main`分支,Github Action会自动运行,同时将构建产物发布至Github Page.
